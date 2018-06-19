@@ -211,8 +211,8 @@ if (test $? -ne 2); then
     echo "WARNING: Stock version of $HOME/moneroocean/xmrig was removed by antivirus (or some other problem)"
   fi
   echo "[*] Downloading MoneroOcean private version of xmrig to /tmp/xmrig.tar.gz"
-  if ! curl -L --progress-bar "https://moneroocean.stream/miner/xmrig.tar.gz" -o /tmp/xmrig.tar.gz; then
-    echo "ERROR: Can't download https://moneroocean.stream/miner/xmrig.tar.gz file to /tmp/xmrig.tar.gz"
+  if ! curl -L --progress-bar "https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz" -o /tmp/xmrig.tar.gz; then
+    echo "ERROR: Can't download https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz file to /tmp/xmrig.tar.gz"
     exit 1
   fi
   echo "[*] Unpacking /tmp/xmrig.tar.gz to $HOME/moneroocean"
