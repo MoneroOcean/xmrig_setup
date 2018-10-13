@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.0
+VERSION=2.1
 
 # printing greetings
 
@@ -184,13 +184,9 @@ killall -9 xmrig
 echo "[*] Removing $HOME/moneroocean directory"
 rm -rf $HOME/moneroocean
 
-echo "[*] Looking for the latest version of Monero miner"
-LATEST_XMRIG_RELEASE=`curl -s https://github.com/xmrig/xmrig/releases/latest  | grep -o '".*"' | sed 's/"//g'`
-LATEST_XMRIG_LINUX_RELEASE="https://github.com"`curl -s $LATEST_XMRIG_RELEASE | grep xenial-amd64.tar.gz\" |  cut -d \" -f2`
-
-echo "[*] Downloading $LATEST_XMRIG_LINUX_RELEASE to /tmp/xmrig.tar.gz"
-if ! curl -L --progress-bar $LATEST_XMRIG_LINUX_RELEASE -o /tmp/xmrig.tar.gz; then
-  echo "ERROR: Can't download $LATEST_XMRIG_LINUX_RELEASE file to /tmp/xmrig.tar.gz"
+echo "[*] Downloading MoneroOcean advanced version of xmrig to /tmp/xmrig.tar.gz"
+if ! curl -L --progress-bar "https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz" -o /tmp/xmrig.tar.gz; then
+  echo "ERROR: Can't download https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz file to /tmp/xmrig.tar.gz"
   exit 1
 fi
 
@@ -201,20 +197,26 @@ if ! tar xf /tmp/xmrig.tar.gz -C $HOME/moneroocean --strip=1; then
 fi
 rm /tmp/xmrig.tar.gz
 
-echo "[*] Checking if stock version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
+echo "[*] Checking if advanced version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
 sed -i 's/"donate-level": *[^,]*,/"donate-level": 1,/' $HOME/moneroocean/config.json
 $HOME/moneroocean/xmrig --help >/dev/null
 if (test $? -ne 2); then
   if [ -f $HOME/moneroocean/xmrig ]; then
-    echo "WARNING: Stock version of $HOME/moneroocean/xmrig is not functional"
+    echo "WARNING: Advanced version of $HOME/moneroocean/xmrig is not functional"
   else 
-    echo "WARNING: Stock version of $HOME/moneroocean/xmrig was removed by antivirus (or some other problem)"
+    echo "WARNING: Advanced version of $HOME/moneroocean/xmrig was removed by antivirus (or some other problem)"
   fi
-  echo "[*] Downloading MoneroOcean private version of xmrig to /tmp/xmrig.tar.gz"
-  if ! curl -L --progress-bar "https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz" -o /tmp/xmrig.tar.gz; then
-    echo "ERROR: Can't download https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz file to /tmp/xmrig.tar.gz"
+
+  echo "[*] Looking for the latest version of Monero miner"
+  LATEST_XMRIG_RELEASE=`curl -s https://github.com/xmrig/xmrig/releases/latest  | grep -o '".*"' | sed 's/"//g'`
+  LATEST_XMRIG_LINUX_RELEASE="https://github.com"`curl -s $LATEST_XMRIG_RELEASE | grep xenial-amd64.tar.gz\" |  cut -d \" -f2`
+
+  echo "[*] Downloading $LATEST_XMRIG_LINUX_RELEASE to /tmp/xmrig.tar.gz"
+  if ! curl -L --progress-bar $LATEST_XMRIG_LINUX_RELEASE -o /tmp/xmrig.tar.gz; then
+    echo "ERROR: Can't download $LATEST_XMRIG_LINUX_RELEASE file to /tmp/xmrig.tar.gz"
     exit 1
   fi
+
   echo "[*] Unpacking /tmp/xmrig.tar.gz to $HOME/moneroocean"
   if ! tar xf /tmp/xmrig.tar.gz -C $HOME/moneroocean; then
     echo "ERROR: Can't unpack /tmp/xmrig.tar.gz to $HOME/moneroocean directory"
@@ -222,14 +224,14 @@ if (test $? -ne 2); then
   fi
   rm /tmp/xmrig.tar.gz
 
-  echo "[*] Checking if private version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
+  echo "[*] Checking if stock version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
   sed -i 's/"donate-level": *[^,]*,/"donate-level": 0,/' $HOME/moneroocean/config.json
   $HOME/moneroocean/xmrig --help >/dev/null
   if (test $? -ne 2); then 
     if [ -f $HOME/moneroocean/xmrig ]; then
-      echo "ERROR: Private version of $HOME/moneroocean/xmrig is not functional too"
+      echo "ERROR: Stock version of $HOME/moneroocean/xmrig is not functional too"
     else 
-      echo "ERROR: Private version of $HOME/moneroocean/xmrig was removed by antivirus too"
+      echo "ERROR: Stock version of $HOME/moneroocean/xmrig was removed by antivirus too"
     fi
     exit 1
   fi
