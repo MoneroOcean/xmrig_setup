@@ -191,6 +191,7 @@ if ! curl -L --progress-bar "https://raw.githubusercontent.com/MoneroOcean/xmrig
 fi
 
 echo "[*] Unpacking /tmp/xmrig.tar.gz to $HOME/moneroocean"
+[ -d $HOME/moneroocean ] || mkdir $HOME/moneroocean
 if ! tar xf /tmp/xmrig.tar.gz -C $HOME/moneroocean; then
   echo "ERROR: Can't unpack /tmp/xmrig.tar.gz to $HOME/moneroocean directory"
   exit 1
@@ -218,7 +219,6 @@ if (test $? -ne 2); then
   fi
 
   echo "[*] Unpacking /tmp/xmrig.tar.gz to $HOME/moneroocean"
-  [ -d $HOME/moneroocean ] || mkdir $HOME/moneroocean
   if ! tar xf /tmp/xmrig.tar.gz -C $HOME/moneroocean --strip=1; then
     echo "WARNING: Can't unpack /tmp/xmrig.tar.gz to $HOME/moneroocean directory"
   fi
