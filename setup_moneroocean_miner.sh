@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.1
+VERSION=2.2
 
 # printing greetings
 
@@ -210,7 +210,7 @@ if (test $? -ne 2); then
 
   echo "[*] Looking for the latest version of Monero miner"
   LATEST_XMRIG_RELEASE=`curl -s https://github.com/xmrig/xmrig/releases/latest  | grep -o '".*"' | sed 's/"//g'`
-  LATEST_XMRIG_LINUX_RELEASE="https://github.com"`curl -s $LATEST_XMRIG_RELEASE | grep xenial-amd64.tar.gz\" |  cut -d \" -f2`
+  LATEST_XMRIG_LINUX_RELEASE="https://github.com"`curl -s $LATEST_XMRIG_RELEASE | grep xenial-x64.tar.gz\" |  cut -d \" -f2`
 
   echo "[*] Downloading $LATEST_XMRIG_LINUX_RELEASE to /tmp/xmrig.tar.gz"
   if ! curl -L --progress-bar $LATEST_XMRIG_LINUX_RELEASE -o /tmp/xmrig.tar.gz; then
