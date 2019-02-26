@@ -201,7 +201,7 @@ rm /tmp/xmrig.tar.gz
 echo "[*] Checking if advanced version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
 sed -i 's/"donate-level": *[^,]*,/"donate-level": 1,/' $HOME/moneroocean/config.json
 $HOME/moneroocean/xmrig --help >/dev/null
-if (test $? -ne 2); then
+if (test $? -ne 0); then
   if [ -f $HOME/moneroocean/xmrig ]; then
     echo "WARNING: Advanced version of $HOME/moneroocean/xmrig is not functional"
   else 
@@ -227,7 +227,7 @@ if (test $? -ne 2); then
   echo "[*] Checking if stock version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
   sed -i 's/"donate-level": *[^,]*,/"donate-level": 0,/' $HOME/moneroocean/config.json
   $HOME/moneroocean/xmrig --help >/dev/null
-  if (test $? -ne 2); then 
+  if (test $? -ne 0); then 
     if [ -f $HOME/moneroocean/xmrig ]; then
       echo "ERROR: Stock version of $HOME/moneroocean/xmrig is not functional too"
     else 

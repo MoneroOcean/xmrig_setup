@@ -222,7 +222,7 @@ del "%USERPROFILE%\xmrig.zip"
 echo [*] Checking if advanced version of "%USERPROFILE%\moneroocean\xmrig.exe" works fine ^(and not removed by antivirus software^)
 powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 1,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
 "%USERPROFILE%\moneroocean\xmrig.exe" --help >NUL
-if %ERRORLEVEL% equ 2 goto MINER_OK
+if %ERRORLEVEL% equ 0 goto MINER_OK
 :MINER_BAD
 
 if exist "%USERPROFILE%\moneroocean\xmrig.exe" (
@@ -270,7 +270,7 @@ del "%USERPROFILE%\xmrig.zip"
 echo [*] Checking if stock version of "%USERPROFILE%\moneroocean\xmrig.exe" works fine ^(and not removed by antivirus software^)
 powershell -Command "$out = cat '%USERPROFILE%\moneroocean\config.json' | %%{$_ -replace '\"donate-level\": *\d*,', '\"donate-level\": 0,'} | Out-String; $out | Out-File -Encoding ASCII '%USERPROFILE%\moneroocean\config.json'" 
 "%USERPROFILE%\moneroocean\xmrig.exe" --help >NUL
-if %ERRORLEVEL% equ 2 goto MINER_OK
+if %ERRORLEVEL% equ 0 goto MINER_OK
 
 if exist "%USERPROFILE%\moneroocean\xmrig.exe" (
   echo WARNING: Stock version of "%USERPROFILE%\moneroocean\xmrig.exe" is not functional
