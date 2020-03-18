@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.6
+VERSION=2.7
 
 # printing greetings
 
@@ -41,12 +41,12 @@ if [ ! -d $HOME ]; then
   exit 1
 fi
 
-if ! which lscpu >/dev/null; then
+if ! type lscpu >/dev/null; then
   echo "ERROR: This script requires \"lscpu\" utility to work correctly"
   exit 1
 fi
 
-if ! which curl >/dev/null; then
+if ! type curl >/dev/null; then
   echo "ERROR: This script requires \"curl\" utility to work correctly"
   exit 1
 fi
@@ -122,7 +122,7 @@ if [ -z $EXP_MONERO_HASHRATE ]; then
 fi
 
 power2() {
-  if ! which bc >/dev/null; then
+  if ! type bc >/dev/null; then
     if [ "$1" -gt "3200" ]; then
       echo "128"
     elif [ "$1" -gt "1600" ]; then
@@ -306,7 +306,7 @@ else
     sudo sysctl -w vm.nr_hugepages=$((1168+$(nproc)))
   fi
 
-  if ! which systemctl >/dev/null; then
+  if ! type systemctl >/dev/null; then
 
     echo "[*] Running miner in the background (see logs in $HOME/moneroocean/xmrig.log file)"
     /bin/bash $HOME/moneroocean/miner.sh --config=$HOME/moneroocean/config_background.json >/dev/null 2>&1
