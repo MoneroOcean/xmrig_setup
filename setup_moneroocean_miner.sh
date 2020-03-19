@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.7
+VERSION=2.8
 
 # printing greetings
 
@@ -323,6 +323,7 @@ Description=Monero miner service
 [Service]
 ExecStart=$HOME/moneroocean/xmrig --config=$HOME/moneroocean/config.json
 Nice=10
+CPUWeight=1
 
 [Install]
 WantedBy=multi-user.target
