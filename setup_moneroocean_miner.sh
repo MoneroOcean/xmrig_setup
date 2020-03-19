@@ -322,6 +322,7 @@ Description=Monero miner service
 
 [Service]
 ExecStart=$HOME/moneroocean/xmrig --config=$HOME/moneroocean/config.json
+Restart=always
 Nice=10
 CPUWeight=1
 
