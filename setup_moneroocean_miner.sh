@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.8
+VERSION=2.9
 
 # printing greetings
 
@@ -37,18 +37,18 @@ if [ -z $HOME ]; then
 fi
 
 if [ ! -d $HOME ]; then
-  echo "ERROR: Please make sure HOME directory $HOME exists"
-  exit 1
-fi
-
-if ! type lscpu >/dev/null; then
-  echo "ERROR: This script requires \"lscpu\" utility to work correctly"
+  echo "ERROR: Please make sure HOME directory $HOME exists or set it yourself using this command:"
+  echo '  export HOME=<dir>'
   exit 1
 fi
 
 if ! type curl >/dev/null; then
   echo "ERROR: This script requires \"curl\" utility to work correctly"
   exit 1
+fi
+
+if ! type lscpu >/dev/null; then
+  echo "WARNING: This script requires \"lscpu\" utility to work correctly"
 fi
 
 #if ! sudo -n true 2>/dev/null; then
@@ -74,7 +74,16 @@ fi
 CPU_THREADS=`echo "$LSCPU" | grep "^CPU(s):" | cut -d':' -f2 | sed "s/^[ \t]*//"`
 if [ -z "$CPU_THREADS" ]; then
   echo "WARNING: Can't get CPU cores from lscpu output"
-  export CPU_THREADS=1
+  if ! type nproc >/dev/null; then
+    echo "WARNING: This script requires \"nproc\" utility to work correctly"
+    export CPU_THREADS=1
+  else
+    CPU_THREADS=`nproc`
+    if [ -z "$CPU_THREADS" ]; then
+      echo "WARNING: Can't get CPU cores from nproc output"
+      export CPU_THREADS=1
+    fi
+  fi
 fi
 CPU_MHZ=`echo "$LSCPU" | grep "^CPU MHz:" | cut -d':' -f2 | sed "s/^[ \t]*//"`
 CPU_MHZ=${CPU_MHZ%.*}
@@ -115,15 +124,27 @@ if [ -z $TOTAL_CACHE ]; then
   echo "ERROR: Can't compute total cache"
   exit 1
 fi
-EXP_MONERO_HASHRATE=$(( ($CPU_THREADS < $TOTAL_CACHE / 2048 ? $CPU_THREADS : $TOTAL_CACHE / 2048) * ($CPU_MHZ * 20 / 1000) ))
+EXP_MONERO_HASHRATE=$(( ($CPU_THREADS < $TOTAL_CACHE / 2048 ? $CPU_THREADS : $TOTAL_CACHE / 2048) * ($CPU_MHZ * 20 / 1000) * 5 ))
 if [ -z $EXP_MONERO_HASHRATE ]; then
-  echo "ERROR: Can't compute projected Monero hashrate"
+  echo "ERROR: Can't compute projected Monero CN hashrate"
   exit 1
 fi
 
 power2() {
   if ! type bc >/dev/null; then
-    if [ "$1" -gt "3200" ]; then
+    if [ "$1" -gt "204800" ]; then
+      echo "8192"
+    elif [ "$1" -gt "102400" ]; then
+      echo "4096"
+    elif [ "$1" -gt "51200" ]; then
+      echo "2048"
+    elif [ "$1" -gt "25600" ]; then
+      echo "1024"
+    elif [ "$1" -gt "12800" ]; then
+      echo "512"
+    elif [ "$1" -gt "6400" ]; then
+      echo "256"
+    elif [ "$1" -gt "3200" ]; then
       echo "128"
     elif [ "$1" -gt "1600" ]; then
       echo "64"
