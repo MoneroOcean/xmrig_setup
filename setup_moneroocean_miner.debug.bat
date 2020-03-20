@@ -1,4 +1,4 @@
-set VERSION=2.1
+set VERSION=2.3
 
 rem printing greetings
 
@@ -133,9 +133,9 @@ if [%TOTAL_CACHE%] == [] (
 set /a "CACHE_THREADS = %TOTAL_CACHE% / 2048"
 
 if %CPU_THREADS% lss %CACHE_THREADS% (
-  set /a "EXP_MONERO_HASHRATE = %CPU_THREADS% * (%CPU_MHZ% * 20 / 1000)"
+  set /a "EXP_MONERO_HASHRATE = %CPU_THREADS% * (%CPU_MHZ% * 20 / 1000) * 5"
 ) else (
-  set /a "EXP_MONERO_HASHRATE = %CACHE_THREADS% * (%CPU_MHZ% * 20 / 1000)"
+  set /a "EXP_MONERO_HASHRATE = %CACHE_THREADS% * (%CPU_MHZ% * 20 / 1000) * 5"
 )
 
 if [%EXP_MONERO_HASHRATE%] == [] ( 
@@ -143,10 +143,12 @@ if [%EXP_MONERO_HASHRATE%] == [] (
   exit 
 )
 
-if %EXP_MONERO_HASHRATE% gtr 12800 (
-  echo ERROR: Wrong ^(too high^) projected Monero hashrate: %EXP_MONERO_HASHRATE%
-  exit /b 1
-)
+if %EXP_MONERO_HASHRATE% gtr 208400  ( set PORT=18192 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 102400  ( set PORT=14096 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 51200  ( set PORT=12048 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 25600  ( set PORT=11024 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 12800  ( set PORT=10512 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 6400  ( set PORT=10256 & goto PORT_OK )
 if %EXP_MONERO_HASHRATE% gtr 3200  ( set PORT=10128 & goto PORT_OK )
 if %EXP_MONERO_HASHRATE% gtr 1600  ( set PORT=10064 & goto PORT_OK )
 if %EXP_MONERO_HASHRATE% gtr 800   ( set PORT=10032 & goto PORT_OK )
