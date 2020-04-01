@@ -1,6 +1,6 @@
 @echo off
 
-set VERSION=2.3
+set VERSION=2.4
 
 rem printing greetings
 
