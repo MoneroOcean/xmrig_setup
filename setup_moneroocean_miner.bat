@@ -86,44 +86,44 @@ rem calculating port
 
 for /f "tokens=*" %%a in ('wmic cpu get SocketDesignation /Format:List ^| findstr /r /v "^$" ^| find /c /v ""') do set CPU_SOCKETS=%%a
 if [%CPU_SOCKETS%] == [] ( 
-  echo ERROR: Can't get CPU sockets from wmic output
-  exit 
+  echo WARNING: Can't get CPU sockets from wmic output
+  set CPU_SOCKETS=1
 )
 
 for /f "tokens=*" %%a in ('wmic cpu get NumberOfCores /Format:List ^| findstr /r /v "^$"') do set CPU_CORES_PER_SOCKET=%%a
 for /f "tokens=1,* delims==" %%a in ("%CPU_CORES_PER_SOCKET%") do set CPU_CORES_PER_SOCKET=%%b
 if [%CPU_CORES_PER_SOCKET%] == [] ( 
-  echo ERROR: Can't get CPU cores per socket from wmic output
-  exit 
+  echo WARNING: Can't get CPU cores per socket from wmic output
+  set CPU_CORES_PER_SOCKET=1
 )
 
 for /f "tokens=*" %%a in ('wmic cpu get NumberOfLogicalProcessors /Format:List ^| findstr /r /v "^$"') do set CPU_THREADS=%%a
 for /f "tokens=1,* delims==" %%a in ("%CPU_THREADS%") do set CPU_THREADS=%%b
 if [%CPU_THREADS%] == [] ( 
-  echo ERROR: Can't get CPU cores from wmic output
-  exit 
+  echo WARNING: Can't get CPU cores from wmic output
+  set CPU_THREADS=1
 )
 set /a "CPU_THREADS = %CPU_SOCKETS% * %CPU_THREADS%"
 
 for /f "tokens=*" %%a in ('wmic cpu get MaxClockSpeed /Format:List ^| findstr /r /v "^$"') do set CPU_MHZ=%%a
 for /f "tokens=1,* delims==" %%a in ("%CPU_MHZ%") do set CPU_MHZ=%%b
 if [%CPU_MHZ%] == [] ( 
-  echo ERROR: Can't get CPU MHz from wmic output
-  exit 
+  echo WARNING: Can't get CPU MHz from wmic output
+  set CPU_MHZ=1000
 )
 
 for /f "tokens=*" %%a in ('wmic cpu get L2CacheSize /Format:List ^| findstr /r /v "^$"') do set CPU_L2_CACHE=%%a
 for /f "tokens=1,* delims==" %%a in ("%CPU_L2_CACHE%") do set CPU_L2_CACHE=%%b
 if [%CPU_L2_CACHE%] == [] ( 
-  echo ERROR: Can't get L2 CPU cache from wmic output
-  exit 
+  echo WARNING: Can't get L2 CPU cache from wmic output
+  set CPU_L2_CACHE=256
 )
 
 for /f "tokens=*" %%a in ('wmic cpu get L3CacheSize /Format:List ^| findstr /r /v "^$"') do set CPU_L3_CACHE=%%a
 for /f "tokens=1,* delims==" %%a in ("%CPU_L3_CACHE%") do set CPU_L3_CACHE=%%b
 if [%CPU_L3_CACHE%] == [] ( 
-  echo ERROR: Can't get L3 CPU cache from wmic output
-  exit 
+  echo WARNING: Can't get L3 CPU cache from wmic output
+  set CPU_L3_CACHE=2048
 )
 
 set /a "TOTAL_CACHE = %CPU_SOCKETS% * (%CPU_L2_CACHE% / %CPU_CORES_PER_SOCKET% + %CPU_L3_CACHE%)"
