@@ -46,8 +46,7 @@ if not exist "%USERPROFILE%" (
 
 where wmic >NUL
 if not %errorlevel% == 0 (
-  echo ERROR: This script requires "wmic" utility to work correctly
-  exit /b 1
+  echo WARNING: This script requires "wmic" utility to work correctly
 )
 
 where powershell >NUL
