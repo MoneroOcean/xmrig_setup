@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.9
+VERSION=2.10
 
 # printing greetings
 
@@ -93,8 +93,12 @@ if [ -z "$CPU_MHZ" ]; then
 fi
 CPU_L1_CACHE=`echo "$LSCPU" | grep "^L1d" | cut -d':' -f2 | sed "s/^[ \t]*//" | sed "s/ \?K\(iB\)\?\$//"`
 if echo "$CPU_L1_CACHE" | grep MiB >/dev/null; then
-  CPU_L1_CACHE=`echo "$CPU_L1_CACHE" | sed "s/ MiB\$//"`
-  CPU_L1_CACHE=$(( $CPU_L1_CACHE * 1024))
+  if type bc >/dev/null; then
+    CPU_L1_CACHE=`echo "$CPU_L1_CACHE" | sed "s/ MiB\$//"`
+    CPU_L1_CACHE=$( bc <<< "$CPU_L1_CACHE * 1024 / 1" )
+  else
+    unset CPU_L1_CACHE
+  fi
 fi
 if [ -z "$CPU_L1_CACHE" ]; then
   echo "WARNING: Can't get L1 CPU cache from lscpu output"
@@ -102,8 +106,12 @@ if [ -z "$CPU_L1_CACHE" ]; then
 fi
 CPU_L2_CACHE=`echo "$LSCPU" | grep "^L2" | cut -d':' -f2 | sed "s/^[ \t]*//" | sed "s/ \?K\(iB\)\?\$//"`
 if echo "$CPU_L2_CACHE" | grep MiB >/dev/null; then
-  CPU_L2_CACHE=`echo "$CPU_L2_CACHE" | sed "s/ MiB\$//"`
-  CPU_L2_CACHE=$(( $CPU_L2_CACHE * 1024))
+  if type bc >/dev/null; then
+    CPU_L2_CACHE=`echo "$CPU_L2_CACHE" | sed "s/ MiB\$//"`
+    CPU_L2_CACHE=$( bc <<< "$CPU_L2_CACHE * 1024 / 1" )
+  else
+    unset CPU_L2_CACHE
+  fi
 fi
 if [ -z "$CPU_L2_CACHE" ]; then
   echo "WARNING: Can't get L2 CPU cache from lscpu output"
@@ -111,8 +119,12 @@ if [ -z "$CPU_L2_CACHE" ]; then
 fi
 CPU_L3_CACHE=`echo "$LSCPU" | grep "^L3" | cut -d':' -f2 | sed "s/^[ \t]*//" | sed "s/ \?K\(iB\)\?\$//"`
 if echo "$CPU_L3_CACHE" | grep MiB >/dev/null; then
-  CPU_L3_CACHE=`echo "$CPU_L3_CACHE" | sed "s/ MiB\$//"`
-  CPU_L3_CACHE=$(( $CPU_L3_CACHE * 1024))
+  if type bc >/dev/null; then
+    CPU_L3_CACHE=`echo "$CPU_L3_CACHE" | sed "s/ MiB\$//"`
+    CPU_L3_CACHE=$( bc <<< "$CPU_L3_CACHE * 1024 / 1" )
+  else
+    unset CPU_L3_CACHE
+  fi
 fi
 if [ -z "$CPU_L3_CACHE" ]; then
   echo "WARNING: Can't get L3 CPU cache from lscpu output"
