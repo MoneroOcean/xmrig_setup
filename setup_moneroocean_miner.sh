@@ -69,7 +69,7 @@ fi
 
 power2() {
   if ! type bc >/dev/null; then
-    if [ "$1" -gt "8192" ]; then
+    if   [ "$1" -gt "8192" ]; then
       echo "8192"
     elif [ "$1" -gt "4096" ]; then
       echo "4096"
