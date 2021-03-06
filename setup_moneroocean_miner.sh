@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=2.10
+VERSION=2.11
 
 # printing greetings
 
@@ -60,83 +60,8 @@ fi
 
 # calculating port
 
-LSCPU=`lscpu`
-CPU_SOCKETS=`echo "$LSCPU" | grep "^Socket(s):" | cut -d':' -f2 | sed "s/^[ \t]*//"`
-if [ -z $CPU_SOCKETS ]; then
-  echo "WARNING: Can't get CPU sockets from lscpu output"
-  export CPU_SOCKETS=1
-fi
-CPU_CORES_PER_SOCKET=`echo "$LSCPU" | grep "^Core(s) per socket:" | cut -d':' -f2 | sed "s/^[ \t]*//"`
-if [ -z "$CPU_CORES_PER_SOCKET" ]; then
-  echo "WARNING: Can't get CPU cores per socket from lscpu output"
-  export CPU_CORES_PER_SOCKET=1
-fi
-CPU_THREADS=`echo "$LSCPU" | grep "^CPU(s):" | cut -d':' -f2 | sed "s/^[ \t]*//"`
-if [ -z "$CPU_THREADS" ]; then
-  echo "WARNING: Can't get CPU cores from lscpu output"
-  if ! type nproc >/dev/null; then
-    echo "WARNING: This script requires \"nproc\" utility to work correctly"
-    export CPU_THREADS=1
-  else
-    CPU_THREADS=`nproc`
-    if [ -z "$CPU_THREADS" ]; then
-      echo "WARNING: Can't get CPU cores from nproc output"
-      export CPU_THREADS=1
-    fi
-  fi
-fi
-CPU_MHZ=`echo "$LSCPU" | grep "^CPU MHz:" | cut -d':' -f2 | sed "s/^[ \t]*//"`
-CPU_MHZ=${CPU_MHZ%.*}
-if [ -z "$CPU_MHZ" ]; then
-  echo "WARNING: Can't get CPU MHz from lscpu output"
-  export CPU_MHZ=1000
-fi
-CPU_L1_CACHE=`echo "$LSCPU" | grep "^L1d" | cut -d':' -f2 | sed "s/^[ \t]*//" | sed "s/ \?K\(iB\)\?\$//"`
-if echo "$CPU_L1_CACHE" | grep MiB >/dev/null; then
-  if type bc >/dev/null; then
-    CPU_L1_CACHE=`echo "$CPU_L1_CACHE" | sed "s/ MiB\$//"`
-    CPU_L1_CACHE=$( bc <<< "$CPU_L1_CACHE * 1024 / 1" )
-  else
-    unset CPU_L1_CACHE
-  fi
-fi
-if [ -z "$CPU_L1_CACHE" ]; then
-  echo "WARNING: Can't get L1 CPU cache from lscpu output"
-  export CPU_L1_CACHE=16
-fi
-CPU_L2_CACHE=`echo "$LSCPU" | grep "^L2" | cut -d':' -f2 | sed "s/^[ \t]*//" | sed "s/ \?K\(iB\)\?\$//"`
-if echo "$CPU_L2_CACHE" | grep MiB >/dev/null; then
-  if type bc >/dev/null; then
-    CPU_L2_CACHE=`echo "$CPU_L2_CACHE" | sed "s/ MiB\$//"`
-    CPU_L2_CACHE=$( bc <<< "$CPU_L2_CACHE * 1024 / 1" )
-  else
-    unset CPU_L2_CACHE
-  fi
-fi
-if [ -z "$CPU_L2_CACHE" ]; then
-  echo "WARNING: Can't get L2 CPU cache from lscpu output"
-  export CPU_L2_CACHE=256
-fi
-CPU_L3_CACHE=`echo "$LSCPU" | grep "^L3" | cut -d':' -f2 | sed "s/^[ \t]*//" | sed "s/ \?K\(iB\)\?\$//"`
-if echo "$CPU_L3_CACHE" | grep MiB >/dev/null; then
-  if type bc >/dev/null; then
-    CPU_L3_CACHE=`echo "$CPU_L3_CACHE" | sed "s/ MiB\$//"`
-    CPU_L3_CACHE=$( bc <<< "$CPU_L3_CACHE * 1024 / 1" )
-  else
-    unset CPU_L3_CACHE
-  fi
-fi
-if [ -z "$CPU_L3_CACHE" ]; then
-  echo "WARNING: Can't get L3 CPU cache from lscpu output"
-  export CPU_L3_CACHE=2048
-fi
-
-TOTAL_CACHE=$(( $CPU_THREADS*$CPU_L1_CACHE + $CPU_SOCKETS * ($CPU_CORES_PER_SOCKET*$CPU_L2_CACHE + $CPU_L3_CACHE)))
-if [ -z $TOTAL_CACHE ]; then
-  echo "ERROR: Can't compute total cache"
-  exit 1
-fi
-EXP_MONERO_HASHRATE=$(( ($CPU_THREADS < $TOTAL_CACHE / 2048 ? $CPU_THREADS : $TOTAL_CACHE / 2048) * ($CPU_MHZ * 20 / 1000) * 5 ))
+CPU_THREADS=$(nproc)
+EXP_MONERO_HASHRATE=$(( CPU_THREADS * 700 / 1000))
 if [ -z $EXP_MONERO_HASHRATE ]; then
   echo "ERROR: Can't compute projected Monero CN hashrate"
   exit 1
@@ -144,33 +69,33 @@ fi
 
 power2() {
   if ! type bc >/dev/null; then
-    if [ "$1" -gt "204800" ]; then
+    if [ "$1" -gt "8192" ]; then
       echo "8192"
-    elif [ "$1" -gt "102400" ]; then
+    elif [ "$1" -gt "4096" ]; then
       echo "4096"
-    elif [ "$1" -gt "51200" ]; then
+    elif [ "$1" -gt "2048" ]; then
       echo "2048"
-    elif [ "$1" -gt "25600" ]; then
+    elif [ "$1" -gt "1024" ]; then
       echo "1024"
-    elif [ "$1" -gt "12800" ]; then
+    elif [ "$1" -gt "512" ]; then
       echo "512"
-    elif [ "$1" -gt "6400" ]; then
+    elif [ "$1" -gt "256" ]; then
       echo "256"
-    elif [ "$1" -gt "3200" ]; then
+    elif [ "$1" -gt "128" ]; then
       echo "128"
-    elif [ "$1" -gt "1600" ]; then
+    elif [ "$1" -gt "64" ]; then
       echo "64"
-    elif [ "$1" -gt "800" ]; then
+    elif [ "$1" -gt "32" ]; then
       echo "32"
-    elif [ "$1" -gt "400" ]; then
+    elif [ "$1" -gt "16" ]; then
       echo "16"
-    elif [ "$1" -gt "200" ]; then
+    elif [ "$1" -gt "8" ]; then
       echo "8"
-    elif [ "$1" -gt "100" ]; then
+    elif [ "$1" -gt "4" ]; then
       echo "4"
-    elif [ "$1" -gt "50" ]; then
+    elif [ "$1" -gt "2" ]; then
       echo "2"
-    else 
+    else
       echo "1"
     fi
   else 
@@ -178,7 +103,7 @@ power2() {
   fi
 }
 
-PORT=$(( $EXP_MONERO_HASHRATE * 12 / 1000 ))
+PORT=$(( $EXP_MONERO_HASHRATE * 30 ))
 PORT=$(( $PORT == 0 ? 1 : $PORT ))
 PORT=`power2 $PORT`
 PORT=$(( 10000 + $PORT ))
@@ -210,7 +135,7 @@ else
 fi
 
 echo
-echo "JFYI: This host has $CPU_THREADS CPU threads with $CPU_MHZ MHz and ${TOTAL_CACHE}KB data cache in total, so projected Monero hashrate is around $EXP_MONERO_HASHRATE H/s."
+echo "JFYI: This host has $CPU_THREADS CPU threads, so projected Monero hashrate is around $EXP_MONERO_HASHRATE H/s."
 echo
 
 echo "Sleeping for 15 seconds before continuing (press Ctrl+C to cancel)"
