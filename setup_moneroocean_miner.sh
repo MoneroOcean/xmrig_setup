@@ -135,7 +135,7 @@ else
 fi
 
 echo
-echo "JFYI: This host has $CPU_THREADS CPU threads, so projected Monero hashrate is around $EXP_MONERO_HASHRATE H/s."
+echo "JFYI: This host has $CPU_THREADS CPU threads, so projected Monero hashrate is around $EXP_MONERO_HASHRATE KH/s."
 echo
 
 echo "Sleeping for 15 seconds before continuing (press Ctrl+C to cancel)"
