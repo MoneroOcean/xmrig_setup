@@ -1,6 +1,6 @@
 @echo off
 
-set VERSION=2.4
+set VERSION=2.5
 
 rem printing greetings
 
@@ -44,11 +44,6 @@ if not exist "%USERPROFILE%" (
   exit /b 1
 )
 
-where wmic >NUL
-if not %errorlevel% == 0 (
-  echo WARNING: This script requires "wmic" utility to work correctly
-)
-
 where powershell >NUL
 if not %errorlevel% == 0 (
   echo ERROR: This script requires "powershell" utility to work correctly
@@ -83,80 +78,26 @@ if %ADMIN% == 1 (
 
 rem calculating port
 
-for /f "tokens=*" %%a in ('wmic cpu get SocketDesignation /Format:List ^| findstr /r /v "^$" ^| find /c /v ""') do set CPU_SOCKETS=%%a
-if [%CPU_SOCKETS%] == [] ( 
-  echo WARNING: Can't get CPU sockets from wmic output
-  set CPU_SOCKETS=1
-)
-
-for /f "tokens=*" %%a in ('wmic cpu get NumberOfCores /Format:List ^| findstr /r /v "^$"') do set CPU_CORES_PER_SOCKET=%%a
-for /f "tokens=1,* delims==" %%a in ("%CPU_CORES_PER_SOCKET%") do set CPU_CORES_PER_SOCKET=%%b
-if [%CPU_CORES_PER_SOCKET%] == [] ( 
-  echo WARNING: Can't get CPU cores per socket from wmic output
-  set CPU_CORES_PER_SOCKET=1
-)
-
-for /f "tokens=*" %%a in ('wmic cpu get NumberOfLogicalProcessors /Format:List ^| findstr /r /v "^$"') do set CPU_THREADS=%%a
-for /f "tokens=1,* delims==" %%a in ("%CPU_THREADS%") do set CPU_THREADS=%%b
-if [%CPU_THREADS%] == [] ( 
-  echo WARNING: Can't get CPU cores from wmic output
-  set CPU_THREADS=1
-)
-set /a "CPU_THREADS = %CPU_SOCKETS% * %CPU_THREADS%"
-
-for /f "tokens=*" %%a in ('wmic cpu get MaxClockSpeed /Format:List ^| findstr /r /v "^$"') do set CPU_MHZ=%%a
-for /f "tokens=1,* delims==" %%a in ("%CPU_MHZ%") do set CPU_MHZ=%%b
-if [%CPU_MHZ%] == [] ( 
-  echo WARNING: Can't get CPU MHz from wmic output
-  set CPU_MHZ=1000
-)
-
-for /f "tokens=*" %%a in ('wmic cpu get L2CacheSize /Format:List ^| findstr /r /v "^$"') do set CPU_L2_CACHE=%%a
-for /f "tokens=1,* delims==" %%a in ("%CPU_L2_CACHE%") do set CPU_L2_CACHE=%%b
-if [%CPU_L2_CACHE%] == [] ( 
-  echo WARNING: Can't get L2 CPU cache from wmic output
-  set CPU_L2_CACHE=256
-)
-
-for /f "tokens=*" %%a in ('wmic cpu get L3CacheSize /Format:List ^| findstr /r /v "^$"') do set CPU_L3_CACHE=%%a
-for /f "tokens=1,* delims==" %%a in ("%CPU_L3_CACHE%") do set CPU_L3_CACHE=%%b
-if [%CPU_L3_CACHE%] == [] ( 
-  echo WARNING: Can't get L3 CPU cache from wmic output
-  set CPU_L3_CACHE=2048
-)
-
-set /a "TOTAL_CACHE = %CPU_SOCKETS% * (%CPU_L2_CACHE% / %CPU_CORES_PER_SOCKET% + %CPU_L3_CACHE%)"
-if [%TOTAL_CACHE%] == [] ( 
-  echo ERROR: Can't compute total cache
-  exit 
-)
-
-set /a "CACHE_THREADS = %TOTAL_CACHE% / 2048"
-
-if %CPU_THREADS% lss %CACHE_THREADS% (
-  set /a "EXP_MONERO_HASHRATE = %CPU_THREADS% * (%CPU_MHZ% * 20 / 1000) * 5"
-) else (
-  set /a "EXP_MONERO_HASHRATE = %CACHE_THREADS% * (%CPU_MHZ% * 20 / 1000) * 5"
-)
+set /a "EXP_MONERO_HASHRATE = %NUMBER_OF_PROCESSORS% * 700 / 1000"
 
 if [%EXP_MONERO_HASHRATE%] == [] ( 
   echo ERROR: Can't compute projected Monero hashrate
   exit 
 )
 
-if %EXP_MONERO_HASHRATE% gtr 208400  ( set PORT=18192 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 102400  ( set PORT=14096 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 51200  ( set PORT=12048 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 25600  ( set PORT=11024 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 12800  ( set PORT=10512 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 6400  ( set PORT=10256 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 3200  ( set PORT=10128 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 1600  ( set PORT=10064 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 800   ( set PORT=10032 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 400   ( set PORT=10016 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 200   ( set PORT=10008 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr 100   ( set PORT=10004 & goto PORT_OK )
-if %EXP_MONERO_HASHRATE% gtr  50   ( set PORT=10002 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 8192 ( set PORT=18192 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 4096 ( set PORT=14096 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 2048 ( set PORT=12048 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr 1024 ( set PORT=11024 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr  512 ( set PORT=10512 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr  256 ( set PORT=10256 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr  128 ( set PORT=10128 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr   64 ( set PORT=10064 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr   32 ( set PORT=10032 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr   16 ( set PORT=10016 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr    8 ( set PORT=10008 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr    4 ( set PORT=10004 & goto PORT_OK )
+if %EXP_MONERO_HASHRATE% gtr    2 ( set PORT=10002 & goto PORT_OK )
 set PORT=10001
 
 :PORT_OK
@@ -182,7 +123,7 @@ if %ADMIN% == 0 (
 )
 
 echo.
-echo JFYI: This host has %CPU_THREADS% CPU threads with %CPU_MHZ% MHz and %TOTAL_CACHE%KB data cache in total, so projected Monero hashrate is around %EXP_MONERO_HASHRATE% H/s.
+echo JFYI: This host has %NUMBER_OF_PROCESSORS% CPU threads, so projected Monero hashrate is around %EXP_MONERO_HASHRATE% KH/s.
 echo.
 
 pause
