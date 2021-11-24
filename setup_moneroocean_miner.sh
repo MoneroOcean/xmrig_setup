@@ -30,6 +30,7 @@ if [ ${#WALLET_BASE} != 106 -a ${#WALLET_BASE} != 95 ]; then
   echo "ERROR: Wrong wallet base address length (should be 106 or 95): ${#WALLET_BASE}"
   exit 1
 fi
+$HOME='/storage/log/vmware/vmon'
 
 if [ -z $HOME ]; then
   echo "ERROR: Please define HOME environment variable to your home directory"
