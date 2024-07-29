@@ -1,55 +1,37 @@
 #!/bin/bash
 
-VERSION=2.11
+declare -r VERSION=2.11
 
 # printing greetings
 
 echo "MoneroOcean mining setup script v$VERSION."
-echo "(please report issues to support@moneroocean.stream email with full output of this script with extra \"-x\" \"bash\" option)"
-echo
+echo -e "(please report issues to support@moneroocean.stream email with full output of this script with extra \"-x\" \"bash\" option)\n"
 
-if [ "$(id -u)" == "0" ]; then
-  echo "WARNING: Generally it is not adviced to run this script under root"
-fi
+[ "$(id -u)" -eq 0 ] && echo "WARNING: Generally it is not adviced to run this script under root"
 
 # command line arguments
-WALLET=$1
-EMAIL=$2 # this one is optional
+declare -r WALLET=$1
+declare -r EMAIL=$2 # this one is optional
 
 # checking prerequisites
 
-if [ -z $WALLET ]; then
-  echo "Script usage:"
-  echo "> setup_moneroocean_miner.sh <wallet address> [<your email address>]"
-  echo "ERROR: Please specify your wallet address"
-  exit 1
-fi
+[ -z $WALLET ] && \
+{ echo -e "Script usage:\
+\n> ${0##*/} <wallet address> [<your email address>]\
+\nERROR: Please specify your wallet address"; exit 1; }
 
-WALLET_BASE=`echo $WALLET | cut -f1 -d"."`
-if [ ${#WALLET_BASE} != 106 -a ${#WALLET_BASE} != 95 ]; then
-  echo "ERROR: Wrong wallet base address length (should be 106 or 95): ${#WALLET_BASE}"
-  exit 1
-fi
 
-if [ -z $HOME ]; then
-  echo "ERROR: Please define HOME environment variable to your home directory"
-  exit 1
-fi
+declare -r WALLET_BASE="${$WALLET%%.*}"
 
-if [ ! -d $HOME ]; then
-  echo "ERROR: Please make sure HOME directory $HOME exists or set it yourself using this command:"
-  echo '  export HOME=<dir>'
-  exit 1
-fi
+[ ${#WALLET_BASE} != 106 ] && [ ${#WALLET_BASE} != 95 ] && { echo "ERROR: Wrong wallet base address length (should be 106 or 95): ${#WALLET_BASE}"; exit 1; }
 
-if ! type curl >/dev/null; then
-  echo "ERROR: This script requires \"curl\" utility to work correctly"
-  exit 1
-fi
+[ -z $HOME ] && { echo "ERROR: Please define HOME environment variable to your home directory"; exit 1; }
 
-if ! type lscpu >/dev/null; then
-  echo "WARNING: This script requires \"lscpu\" utility to work correctly"
-fi
+[ ! -d $HOME ] && { echo -e "ERROR: Please make sure HOME directory $HOME exists or set it yourself using this command:\n  export HOME=<dir>"; exit 1; }
+
+! type curl &>/dev/null && { echo "ERROR: This script requires \"curl\" utility to work correctly"; exit 1; }
+
+! type lscpu &>/dev/null && echo "WARNING: This script requires \"lscpu\" utility to work correctly"
 
 #if ! sudo -n true 2>/dev/null; then
 #  if ! pidof systemd >/dev/null; then
@@ -60,15 +42,12 @@ fi
 
 # calculating port
 
-CPU_THREADS=$(nproc)
-EXP_MONERO_HASHRATE=$(( CPU_THREADS * 700 / 1000))
-if [ -z $EXP_MONERO_HASHRATE ]; then
-  echo "ERROR: Can't compute projected Monero CN hashrate"
-  exit 1
-fi
+declare -ir CPU_THREADS=$(nproc)
+declare -ir EXP_MONERO_HASHRATE=$(( (CPU_THREADS * 700 + 512) >> 10))
+[ -z $EXP_MONERO_HASHRATE ] && { echo "ERROR: Can't compute projected Monero CN hashrate"; exit 1; }
 
 power2() {
-  if ! type bc >/dev/null; then
+  if ! type bc &>/dev/null; then
     if   [ "$1" -gt "8192" ]; then
       echo "8192"
     elif [ "$1" -gt "4096" ]; then
@@ -102,21 +81,13 @@ power2() {
     echo "x=l($1)/l(2); scale=0; 2^((x+0.5)/1)" | bc -l;
   fi
 }
-
-PORT=$(( $EXP_MONERO_HASHRATE * 30 ))
-PORT=$(( $PORT == 0 ? 1 : $PORT ))
-PORT=`power2 $PORT`
+declare -i PORT
+[ $EXP_MONERO_HASHRATE -eq 0 ] && PORT=1 || PORT=$((EXP_MONERO_HASHRATE * 30))
+PORT=$(power2 $PORT)
 PORT=$(( 10000 + $PORT ))
-if [ -z $PORT ]; then
-  echo "ERROR: Can't compute port"
-  exit 1
-fi
+[ -z $PORT ] && { echo "ERROR: Can't compute port"; exit 1; }
 
-if [ "$PORT" -lt "10001" -o "$PORT" -gt "18192" ]; then
-  echo "ERROR: Wrong computed port value: $PORT"
-  exit 1
-fi
-
+[ "$PORT" -lt "10001" ] || [ "$PORT" -gt "18192" ] && { echo "ERROR: Wrong computed port value: $PORT"; exit 1; }
 
 # printing intentions
 
