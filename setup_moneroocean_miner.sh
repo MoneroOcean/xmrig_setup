@@ -139,7 +139,7 @@ rm /tmp/xmrig.tar.gz
 echo "[*] Checking if advanced version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
 declare config_json=$(< $HOME/moneroocean/config.json)
 config_json="${config_json//\"donate-level\": [0-9],/\"donate-level\": 1,}"
-echo -en "config_json" > config.json
+echo -en "$config_json" > config.json
 unset config_json
 
 $HOME/moneroocean/xmrig --help &>/dev/null
@@ -166,7 +166,7 @@ if (test $? -ne 0); then
 
   echo "[*] Checking if stock version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
   declare config_json=$(< $HOME/moneroocean/config.json)
-  config_json="$(config_json//\"donate-level\": [0-9],/\"donate-level\": 1,}"
+  config_json="${config_json//\"donate-level\": [0-9],/\"donate-level\": 1,}"
   echo -en "$config_json" > config.json
   unset config_json
   
