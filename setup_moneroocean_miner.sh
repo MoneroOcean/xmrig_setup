@@ -43,7 +43,9 @@ declare -r WALLET_BASE="${$WALLET%%.*}"
 # calculating port
 
 declare -ir CPU_THREADS=$(nproc)
+
 declare -ir EXP_MONERO_HASHRATE=$(( (CPU_THREADS * 700 + 512) >> 10))
+
 [ -z $EXP_MONERO_HASHRATE ] && { echo "ERROR: Can't compute projected Monero CN hashrate"; exit 1; }
 
 power2() {
@@ -82,72 +84,69 @@ power2() {
   fi
 }
 declare -i PORT
+
 [ $EXP_MONERO_HASHRATE -eq 0 ] && PORT=1 || PORT=$((EXP_MONERO_HASHRATE * 30))
+
 PORT=$(power2 $PORT)
+
 PORT=$(( 10000 + $PORT ))
+
 [ -z $PORT ] && { echo "ERROR: Can't compute port"; exit 1; }
 
 [ "$PORT" -lt "10001" ] || [ "$PORT" -gt "18192" ] && { echo "ERROR: Wrong computed port value: $PORT"; exit 1; }
 
 # printing intentions
 
-echo "I will download, setup and run in background Monero CPU miner."
-echo "If needed, miner in foreground can be started by $HOME/moneroocean/miner.sh script."
-echo "Mining will happen to $WALLET wallet."
-if [ ! -z $EMAIL ]; then
-  echo "(and $EMAIL email as password to modify wallet options later at https://moneroocean.stream site)"
-fi
-echo
+echo -e "I will download, setup and run in background Monero CPU miner.\
+\nIf needed, miner in foreground can be started by $HOME/moneroocean/miner.sh script.\
+\nMining will happen to $WALLET wallet.\n"
 
-if ! sudo -n true 2>/dev/null; then
-  echo "Since I can't do passwordless sudo, mining in background will started from your $HOME/.profile file first time you login this host after reboot."
-else
-  echo "Mining in background will be performed using moneroocean_miner systemd service."
-fi
+[ -n $EMAIL ] && echo -e "(and $EMAIL email as password to modify wallet options later at https://moneroocean.stream site)\n\n"
 
-echo
-echo "JFYI: This host has $CPU_THREADS CPU threads, so projected Monero hashrate is around $EXP_MONERO_HASHRATE KH/s."
-echo
+! sudo -n true 2>/dev/null && echo -e "Since I can't do passwordless sudo, mining in background will \
+started from your $HOME/.profile file first time you login this host after reboot.\n\n" || \
+echo -e "Mining in background will be performed using moneroocean_miner systemd service.\n\n"
+
+echo -e "JFYI: This host has $CPU_THREADS CPU threads, so projected Monero hashrate is around $EXP_MONERO_HASHRATE KH/s.\n\n"
 
 echo "Sleeping for 15 seconds before continuing (press Ctrl+C to cancel)"
 sleep 15
-echo
-echo
+echo -e "\n\n"
 
 # start doing stuff: preparing miner
 
 echo "[*] Removing previous moneroocean miner (if any)"
-if sudo -n true 2>/dev/null; then
-  sudo systemctl stop moneroocean_miner.service
-fi
+
+sudo -n true 2>/dev/null && sudo systemctl stop moneroocean_miner.service
+
 killall -9 xmrig
 
 echo "[*] Removing $HOME/moneroocean directory"
 rm -rf $HOME/moneroocean
 
 echo "[*] Downloading MoneroOcean advanced version of xmrig to /tmp/xmrig.tar.gz"
-if ! curl -L --progress-bar "https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz" -o /tmp/xmrig.tar.gz; then
-  echo "ERROR: Can't download https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz file to /tmp/xmrig.tar.gz"
-  exit 1
-fi
+! curl -L --progress-bar "https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz" -o /tmp/xmrig.tar.gz && \
+{ echo "ERROR: Can't download https://raw.githubusercontent.com/MoneroOcean/xmrig_setup/master/xmrig.tar.gz file \
+to /tmp/xmrig.tar.gz"; exit 1; }
 
 echo "[*] Unpacking /tmp/xmrig.tar.gz to $HOME/moneroocean"
 [ -d $HOME/moneroocean ] || mkdir $HOME/moneroocean
-if ! tar xf /tmp/xmrig.tar.gz -C $HOME/moneroocean; then
-  echo "ERROR: Can't unpack /tmp/xmrig.tar.gz to $HOME/moneroocean directory"
-  exit 1
-fi
+! tar xf /tmp/xmrig.tar.gz -C $HOME/moneroocean && { echo "ERROR: Can't unpack /tmp/xmrig.tar.gz \
+to $HOME/moneroocean directory"; exit 1; }
+
 rm /tmp/xmrig.tar.gz
 
 echo "[*] Checking if advanced version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
-sed -i 's/"donate-level": *[^,]*,/"donate-level": 1,/' $HOME/moneroocean/config.json
-$HOME/moneroocean/xmrig --help >/dev/null
+declare config_json=$(< $HOME/moneroocean/config.json)
+config_json="${config_json//\"donate-level\": [0-9],/\"donate-level\": 1,}"
+echo -en "config_json" > config.json
+unset config_json
+
+$HOME/moneroocean/xmrig --help &>/dev/null
 if (test $? -ne 0); then
-  if [ -f $HOME/moneroocean/xmrig ]; then
-    echo "WARNING: Advanced version of $HOME/moneroocean/xmrig is not functional"
-  else 
-    echo "WARNING: Advanced version of $HOME/moneroocean/xmrig was removed by antivirus (or some other problem)"
-  fi
+  [ -f $HOME/moneroocean/xmrig ] && \
+  echo "WARNING: Advanced version of $HOME/moneroocean/xmrig is not functional" || \
+  echo "WARNING: Advanced version of $HOME/moneroocean/xmrig was removed by antivirus (or some other problem)"
 
   echo "[*] Looking for the latest version of Monero miner"
   LATEST_XMRIG_RELEASE=`curl -s https://github.com/xmrig/xmrig/releases/latest  | grep -o '".*"' | sed 's/"//g'`
@@ -166,30 +165,34 @@ if (test $? -ne 0); then
   rm /tmp/xmrig.tar.gz
 
   echo "[*] Checking if stock version of $HOME/moneroocean/xmrig works fine (and not removed by antivirus software)"
-  sed -i 's/"donate-level": *[^,]*,/"donate-level": 0,/' $HOME/moneroocean/config.json
+  declare config_json=$(< $HOME/moneroocean/config.json)
+  config_json="$(config_json//\"donate-level\": [0-9],/\"donate-level\": 1,}"
+  echo -en "$config_json" > config.json
+  unset config_json
+  
   $HOME/moneroocean/xmrig --help >/dev/null
   if (test $? -ne 0); then 
-    if [ -f $HOME/moneroocean/xmrig ]; then
-      echo "ERROR: Stock version of $HOME/moneroocean/xmrig is not functional too"
-    else 
-      echo "ERROR: Stock version of $HOME/moneroocean/xmrig was removed by antivirus too"
-    fi
+    [ -f $HOME/moneroocean/xmrig ] && \
+    echo "ERROR: Stock version of $HOME/moneroocean/xmrig is not functional too" || \
+    echo "ERROR: Stock version of $HOME/moneroocean/xmrig was removed by antivirus too"
     exit 1
   fi
 fi
 
 echo "[*] Miner $HOME/moneroocean/xmrig is OK"
+declare PASS=$(hostname)
+PASS="${PASS%%.*}"
+PASS=${PASS//[^a-zA-Z0-9\-]/_}
 
-PASS=`hostname | cut -f1 -d"." | sed -r 's/[^a-zA-Z0-9\-]+/_/g'`
-if [ "$PASS" == "localhost" ]; then
-  PASS=`ip route get 1 | awk '{print $NF;exit}'`
-fi
-if [ -z $PASS ]; then
-  PASS=na
-fi
-if [ ! -z $EMAIL ]; then
-  PASS="$PASS:$EMAIL"
-fi
+[ "$PASS" == "localhost" ] && \
+{ declare -r IP_ROUTE_OUTPUT=$(ip route get 1); \
+set -- $IP_ROUTE_OUTPUT; \
+declare -ri size=$((${#@}-1)); \
+PASS=${!size}; }
+
+[ -z $PASS ] && PASS=na
+
+[ -n $EMAIL ] && PASS="$PASS:$EMAIL"
 
 sed -i 's/"url": *"[^"]*",/"url": "gulf.moneroocean.stream:'$PORT'",/' $HOME/moneroocean/config.json
 sed -i 's/"user": *"[^"]*",/"user": "'$WALLET'",/' $HOME/moneroocean/config.json
