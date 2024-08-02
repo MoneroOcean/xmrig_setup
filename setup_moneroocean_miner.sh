@@ -21,7 +21,7 @@ declare -r EMAIL=$2 # this one is optional
 \nERROR: Please specify your wallet address"; exit 1; }
 
 
-declare -r WALLET_BASE="${$WALLET%%.*}"
+declare -r WALLET_BASE="${WALLET%%.*}"
 
 [ ${#WALLET_BASE} != 106 ] && [ ${#WALLET_BASE} != 95 ] && { echo "ERROR: Wrong wallet base address length (should be 106 or 95): ${#WALLET_BASE}"; exit 1; }
 
